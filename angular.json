@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "cjoesb-app": {
+    "cjoesb": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/cjoesb-app",
+            "outputPath": "dist/cjoesb",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -62,10 +62,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "cjoesb-app:build:production"
+              "buildTarget": "cjoesb:build:production"
             },
             "development": {
-              "buildTarget": "cjoesb-app:build:development"
+              "buildTarget": "cjoesb:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -73,7 +73,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "cjoesb-app:build"
+            "buildTarget": "cjoesb:build"
           }
         },
         "test": {
@@ -98,6 +98,6 @@
     }
   },
   "cli": {
-    "analytics": "2ff90d72-5152-484c-bcf7-86be11fdd6cb"
+    "analytics": "05843593-b275-4175-bc5c-b27e5a05d6b8"
   }
 }
