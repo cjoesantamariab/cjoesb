@@ -32,4 +32,4 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          scp -r ./build/* usuario@direccion_ip_publica_ec2:/home/ec2-user/cjoesb
+          scp -r ./build/* ec2-user@52.33.87.179:/home/ec2-user/cjoesb
