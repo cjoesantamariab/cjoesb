@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 import BackGround from './components/BackGrounds';
 import InfoCard from './components/InfoCard';
