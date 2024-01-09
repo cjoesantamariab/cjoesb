@@ -32,4 +32,4 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          scp -o StrictHostKeyChecking=no -r ./build/* ec2-user@52.33.87.179:/home/ec2-user/cjoesb
+          scp -o StrictHostKeyChecking=no -r ./build/* ec2-user@52.33.87.179:/usr/share/nginx/html/cjoesb
