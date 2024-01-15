@@ -6,7 +6,7 @@ const InfoCard = () => {
     return (
         <div className="container">
             <div className="InfoCard">
-                <h2 className="centrar1">Cristian Joe.. Santamaria</h2>
+                <h2 className="centrar1">Cristian Joel Santamaria</h2>
                 <div className="content"> 
                     <img src={horse} alt="Caballo de ajedrez" width="150" height="150" style={{ cursor: 'pointer' }}/>
                 </div>

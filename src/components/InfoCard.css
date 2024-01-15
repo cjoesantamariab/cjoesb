@@ -29,4 +29,26 @@
     max-width: none; /* Restaura el ancho máximo para pantallas más grandes */
     height: auto;
   }
+  img{
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* Estilos para pantallas grandes */
+@media screen and (min-width: 768px) {
+  body {
+    font-size: 10px;
+  }
+
+  /* Otros estilos para pantallas grandes */
+}
+
+/* Estilos para dispositivos pequeños */
+@media screen and (max-width: 767px) {
+  body {
+    font-size: 9px;
+  }
+
+  /* Otros estilos para dispositivos pequeños */
 }
