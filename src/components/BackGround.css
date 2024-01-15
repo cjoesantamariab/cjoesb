@@ -3,3 +3,9 @@
     background-size: cover !important;
     height: 100vh;
 }
+
+@media (max-width: 767px) {
+    .contenedorFondo {
+      background-position: center;
+    }
+}
