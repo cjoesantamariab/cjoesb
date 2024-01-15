@@ -33,22 +33,7 @@
     width: 80px;
     height: 80px;
   }
-}
-
-/* Estilos para pantallas grandes */
-@media screen and (min-width: 768px) {
   body {
-    font-size: 10px;
+    font-size: 14px;
   }
-
-  /* Otros estilos para pantallas grandes */
-}
-
-/* Estilos para dispositivos pequeños */
-@media screen and (max-width: 767px) {
-  body {
-    font-size: 9px;
-  }
-
-  /* Otros estilos para dispositivos pequeños */
 }
