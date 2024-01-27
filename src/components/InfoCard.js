@@ -26,7 +26,7 @@ const InfoCard = () => {
                     <a href="https://github.com/cjoesantamariab" target="_blank" rel="noopener noreferrer">
                         <i className="pi pi-github" style={iconStyle}></i>
                     </a>
-                    <a href={`https://web.whatsapp.com/send?phone=${encodeURIComponent(phoneNumber)}`} target="_blank" rel="noopener noreferrer">
+                    <a href={`https://api.whatsapp.com/send?phone=${encodeURIComponent(phoneNumber)}`} target="_blank" rel="noopener noreferrer">
                         <i className="pi pi-whatsapp" style={iconStyle}></i>
                     </a>
                 </div>
