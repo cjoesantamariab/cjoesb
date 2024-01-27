@@ -14,7 +14,7 @@ const InfoCard = () => {
             <div className="InfoCard">
                 <h2 className="centrar1">Cristian Joel Santamaria</h2>
                 <div className="content"> 
-                    <img src={logo} alt="log" style={{ cursor: 'pointer' }}/>
+                    <img src={logo} alt="log" className="centrar2" style={{ cursor: 'pointer' }}/>
                 </div>
                 <div className="centrar1">
                     <a href="https://www.linkedin.com/in/cristian-santamaria-870841134/" target="_blank" rel="noopener noreferrer">
