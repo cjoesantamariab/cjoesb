@@ -15,7 +15,7 @@
   padding: 20px;
   clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
   backdrop-filter: blur(5px);
-  width: 400px;
+  width: 300px;
   height: 300px;
 }
 
@@ -28,10 +28,11 @@
     width: auto;
     max-width: none; /* Restaura el ancho máximo para pantallas más grandes */
     height: auto;
+    max-width: 100%;
   }
   img{
-    width: 80px;
-    height: 80px;
+    max-width: 300px;
+    height: 300px;
   }
   body {
     font-size: 14px;
