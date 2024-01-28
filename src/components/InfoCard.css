@@ -4,6 +4,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 20px;
+  min-height: 150px;
 }
 
 .InfoCard {
@@ -16,7 +17,7 @@
   clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
   backdrop-filter: blur(5px);
   width: 300px;
-  height: 300px;
+  height: 250px;
 }
 
 @media (min-width: 768px) {
@@ -32,7 +33,7 @@
   }
   img{
     max-width: 600px;
-    height: 300px;
+    height: 250px ;
   }
   body {
     font-size: 14px;
