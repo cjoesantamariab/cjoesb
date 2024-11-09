@@ -28,7 +28,6 @@ jobs:
             # Si no existe HEAD~1 (primer commit), asumimos que la infraestructura ha cambiado
             echo "infra_changed=true" >> $GITHUB_ENV
           fi
-        shell: bash
 
   # Job 2: Despliegue de la infraestructura con CloudFormation (si ha cambiado)
   infrastructure:
