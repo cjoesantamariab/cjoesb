@@ -3,7 +3,7 @@ Resources:
   ReactAppBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "${AWS::StackName}-bucket"  # Nombre único basado en el nombre del stack
+      BucketName: !Sub "${AWS::StackName}-bucket-${AWS::AccountId}-${AWS::Region}"  # Nombre único basado en el nombre del stack
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: error.html
