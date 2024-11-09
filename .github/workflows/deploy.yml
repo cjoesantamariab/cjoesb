@@ -18,10 +18,15 @@ jobs:
       - name: Check if CloudFormation template changed
         id: infra_check
         run: |
-          if git diff --name-only HEAD HEAD~1 | grep -q 'infrastructure/cloudformation-template.yml'; then
-            echo "infra_changed=true" >> $GITHUB_ENV
+          if git rev-parse HEAD~1 >/dev/null 2>&1; then
+            if git diff --name-only HEAD HEAD~1 | grep -q 'infrastructure/cloudformation-template.yml'; then
+              echo "infra_changed=true" >> $GITHUB_ENV
+            else
+              echo "infra_changed=false" >> $GITHUB_ENV
+            fi
           else
-            echo "infra_changed=false" >> $GITHUB_ENV
+            # Si no existe HEAD~1 (primer commit), asumimos que la infraestructura ha cambiado
+            echo "infra_changed=true" >> $GITHUB_ENV
           fi
         shell: bash
 
