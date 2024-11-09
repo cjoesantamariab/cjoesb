@@ -1,27 +1,29 @@
 Resources:
-  # 1. Creación del bucket de S3 para el sitio estático
   ReactAppBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "${AWS::StackName}-bucket-${AWS::AccountId}-${AWS::Region}"  # Nombre único basado en el nombre del stack
+      BucketName: !Sub "${AWS::StackName}-bucket-${AWS::AccountId}-${AWS::Region}"
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: error.html
-      AccessControl: PublicRead
+      PublicAccessBlockConfiguration:  # Añadido para permitir acceso público
+        BlockPublicAcls: false
+        IgnorePublicAcls: false
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: false
 
-  # 2. Política de acceso público al bucket de S3
   ReactAppBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
       Bucket: !Ref ReactAppBucket
       PolicyDocument:
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal: "*"
             Action: "s3:GetObject"
             Resource: !Sub "${ReactAppBucket.Arn}/*"
 
-  # 3. Distribución de CloudFront que utiliza el bucket de S3 como origen
   ReactAppCloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
     Properties:
@@ -33,7 +35,7 @@ Resources:
         Enabled: true
         DefaultRootObject: index.html
         ViewerCertificate:
-          CloudFrontDefaultCertificate: true  # Usaremos el certificado SSL de CloudFront, ya que Cloudflare manejará el SSL final.
+          CloudFrontDefaultCertificate: true
         DefaultCacheBehavior:
           AllowedMethods:
             - GET
@@ -47,7 +49,7 @@ Resources:
             QueryString: false
             Cookies:
               Forward: none
-        PriceClass: PriceClass_100  # Esto restringe la distribución a regiones específicas para reducir costos
+        PriceClass: PriceClass_100
         CustomErrorResponses:
           - ErrorCode: 404
             ResponsePagePath: /index.html
