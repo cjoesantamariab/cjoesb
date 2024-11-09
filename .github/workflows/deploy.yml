@@ -10,7 +10,7 @@ jobs:
   check_infrastructure:
     runs-on: ubuntu-latest
     outputs:
-      infra_changed: ${{ steps.infra_check.outputs.infra_changed }}
+      infra_changed: ${{ steps.set_infra_output.outputs.infra_changed }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -29,6 +29,11 @@ jobs:
             echo "infra_changed=true" >> $GITHUB_ENV
           fi
 
+      # Paso para capturar el valor de infra_changed y definirlo como salida
+      - name: Set infra_changed output
+        id: set_infra_output
+        run: echo "::set-output name=infra_changed::$(echo $infra_changed)"
+        
   # Job 2: Despliegue de la infraestructura con CloudFormation (si ha cambiado)
   infrastructure:
     runs-on: ubuntu-latest
