@@ -33,7 +33,7 @@ jobs:
       - name: Set infra_changed output
         id: set_infra_output
         run: echo "::set-output name=infra_changed::$(echo $infra_changed)"
-        
+
   # Job 2: Despliegue de la infraestructura con CloudFormation (si ha cambiado)
   infrastructure:
     runs-on: ubuntu-latest
@@ -46,7 +46,7 @@ jobs:
       - name: Deploy CloudFormation Stack
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: my-react-app-stack
+          name: my-react-app-stack-v2
           template: infrastructure/cloudformation-template.yml
           no-fail-on-empty-changeset: true
           capabilities: CAPABILITY_NAMED_IAM
