@@ -83,7 +83,9 @@ jobs:
 
       - name: Load Environment Variables from Temp File
         run: |
-          source ./${{ env.TEMP_ENV_FILE }}
+          while IFS= read -r line; do
+            echo "$line" >> $GITHUB_ENV
+          done < ./${{ env.TEMP_ENV_FILE }}
           echo "Loaded AWS_S3_BUCKET: $AWS_S3_BUCKET"
           echo "Loaded AWS_CLOUDFRONT_DISTRIBUTION_ID: $AWS_CLOUDFRONT_DISTRIBUTION_ID"
 
