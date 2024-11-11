@@ -47,7 +47,7 @@ jobs:
       - name: Deploy CloudFormation Stack
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: my-react-app-stack-v15
+          name: my-react-app-stack-v16
           template: infrastructure/cloudformation-template.yml
           no-fail-on-empty-changeset: true
           capabilities: CAPABILITY_NAMED_IAM
