@@ -88,7 +88,8 @@ jobs:
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
         with:
-          args: build/ --follow-symlinks --delete
+          args: --follow-symlinks --delete  # Opciones para sincronizar y eliminar archivos obsoletos
+          path: build/  # Configura el directorio de origen para que solo suba el contenido de 'build'      
         env:
           AWS_S3_BUCKET: ${{ env.AWS_S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
