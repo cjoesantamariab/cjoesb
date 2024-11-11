@@ -54,3 +54,9 @@ Resources:
           - ErrorCode: 404
             ResponsePagePath: /index.html
             ResponseCode: 200
+
+Outputs:
+  ReactAppBucketName:
+    Description: "Nombre del bucket de S3 para la aplicación React"
+    Value: !Ref ReactAppBucket
+
