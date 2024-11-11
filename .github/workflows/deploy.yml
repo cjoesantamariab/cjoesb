@@ -6,7 +6,7 @@ on:
       - dev
 
 env:
-  STACK_NAME: my-react-app-stack  # Nombre fijo del stack
+  STACK_NAME: my-react-app-stack # Nombre fijo del stack
 
 jobs:
   # Job 1: Comprobar si la infraestructura necesita desplegarse
@@ -32,7 +32,7 @@ jobs:
       #     fi
       - name: Check if CloudFormation template changed
         id: infra_check
-        run: echo "infra_changed=true" >> $GITHUB_ENV      
+        run: echo "infra_changed=true" >> $GITHUB_ENV
 
       - name: Set infra_changed output
         id: set_infra_output
@@ -43,9 +43,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: check_infrastructure
     if: needs.check_infrastructure.outputs.infra_changed == 'true'
-    outputs:
-      bucket_name: ${{ steps.get_bucket_name.outputs.bucket_name }}  # Output para el nombre del bucket
-      distribution_id: ${{ steps.get_distribution_id.outputs.distribution_id }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -53,7 +50,7 @@ jobs:
       - name: Deploy CloudFormation Stack
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: ${{ env.STACK_NAME }}  # Usar el nombre fijo del stack
+          name: ${{ env.STACK_NAME }}
           template: infrastructure/cloudformation-template.yml
           no-fail-on-empty-changeset: true
           capabilities: CAPABILITY_NAMED_IAM
@@ -62,29 +59,27 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      # Paso de depuración para verificar el nombre del bucket antes de configurarlo como output
-      - name: Debug S3 Bucket Name
+      - name: Store S3 Bucket Name in Environment File
         run: |
           bucket_name=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='ReactAppBucketName'].OutputValue" --output text)
           echo "Detected Bucket Name: $bucket_name"
-          echo "::set-output name=bucket_name::$bucket_name"
-        id: get_bucket_name
+          echo "AWS_S3_BUCKET=$bucket_name" >> $GITHUB_ENV
+
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      # Obtener el ID de la distribución de CloudFront
-      - name: Get CloudFront Distribution ID from CloudFormation
-        id: get_distribution_id
+      - name: Store CloudFront Distribution ID in Environment File
         run: |
           distribution_id=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='ReactAppCloudFrontDistributionId'].OutputValue" --output text)
           echo "Detected Distribution ID: $distribution_id"
-          echo "::set-output name=distribution_id::$distribution_id"
+          echo "AWS_CLOUDFRONT_DISTRIBUTION_ID=$distribution_id" >> $GITHUB_ENV
+
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}          
+          AWS_REGION: ${{ secrets.AWS_REGION }}
 
   # Job 3: Despliegue del código compilado de React
   deploy_code:
@@ -97,7 +92,7 @@ jobs:
       - name: Install Node.js and npm
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: "14"
 
       - name: Install dependencies
         run: npm install
@@ -105,23 +100,25 @@ jobs:
       - name: Build React app
         run: npm run build
 
-      # Paso de depuración para verificar el output de bucket_name
-      - name: Debug bucket name in deploy_code
-        run: 'echo "Bucket Name from infrastructure job: ${{ needs.infrastructure.outputs.bucket_name }}"'
+      # Debug to confirm variables are loaded
+      - name: Debug bucket and distribution ID in deploy_code
+        run: |
+          echo "Bucket Name: $AWS_S3_BUCKET"
+          echo "Distribution ID: $AWS_CLOUDFRONT_DISTRIBUTION_ID"
 
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
         with:
           args: --acl public-read --follow-symlinks --delete
         env:
-          AWS_S3_BUCKET: ${{ needs.infrastructure.outputs.bucket_name }}  # Usar AWS_S3_BUCKET en lugar de destination
+          AWS_S3_BUCKET: $AWS_S3_BUCKET
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
       - name: Invalidate CloudFront Cache
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ needs.infrastructure.outputs.distribution_id }} --paths "/*"
+          aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
