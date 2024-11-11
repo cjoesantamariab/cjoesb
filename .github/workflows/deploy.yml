@@ -6,7 +6,8 @@ on:
       - dev
 
 env:
-  STACK_NAME: my-react-app-stack # Nombre fijo del stack
+  STACK_NAME: my-react-app-stack  # Nombre fijo del stack
+  TEMP_ENV_FILE: temp_env_file  # Archivo temporal para guardar variables
 
 jobs:
   # Job 1: Comprobar si la infraestructura necesita desplegarse
@@ -18,18 +19,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # - name: Check if CloudFormation template changed
-      #   id: infra_check
-      #   run: |
-      #     if git rev-parse HEAD~1 >/dev/null 2>&1; then
-      #       if git diff --name-only HEAD HEAD~1 | grep -q 'infrastructure/cloudformation-template.yml'; then
-      #         echo "infra_changed=true" >> $GITHUB_ENV
-      #       else
-      #         echo "infra_changed=false" >> $GITHUB_ENV
-      #       fi
-      #     else
-      #       echo "infra_changed=true" >> $GITHUB_ENV
-      #     fi
       - name: Check if CloudFormation template changed
         id: infra_check
         run: echo "infra_changed=true" >> $GITHUB_ENV
@@ -59,27 +48,24 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      - name: Store S3 Bucket Name in Environment File
+      - name: Store S3 Bucket Name and CloudFront ID in File
         run: |
           bucket_name=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='ReactAppBucketName'].OutputValue" --output text)
-          echo "Detected Bucket Name: $bucket_name"
-          echo "AWS_S3_BUCKET=$bucket_name" >> $GITHUB_ENV
-
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-
-      - name: Store CloudFront Distribution ID in Environment File
-        run: |
           distribution_id=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='ReactAppCloudFrontDistributionId'].OutputValue" --output text)
+          echo "Detected Bucket Name: $bucket_name"
           echo "Detected Distribution ID: $distribution_id"
-          echo "AWS_CLOUDFRONT_DISTRIBUTION_ID=$distribution_id" >> $GITHUB_ENV
-
+          echo "AWS_S3_BUCKET=$bucket_name" >> ${{ env.TEMP_ENV_FILE }}
+          echo "AWS_CLOUDFRONT_DISTRIBUTION_ID=$distribution_id" >> ${{ env.TEMP_ENV_FILE }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Upload Temp Env File
+        uses: actions/upload-artifact@v2
+        with:
+          name: temp-env
+          path: ${{ env.TEMP_ENV_FILE }}
 
   # Job 3: Despliegue del código compilado de React
   deploy_code:
@@ -88,6 +74,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Download Temp Env File
+        uses: actions/download-artifact@v2
+        with:
+          name: temp-env
+          path: .
+
+      - name: Load Environment Variables from Temp File
+        run: |
+          source ./${{ env.TEMP_ENV_FILE }}
+          echo "Loaded AWS_S3_BUCKET: $AWS_S3_BUCKET"
+          echo "Loaded AWS_CLOUDFRONT_DISTRIBUTION_ID: $AWS_CLOUDFRONT_DISTRIBUTION_ID"
 
       - name: Install Node.js and npm
         uses: actions/setup-node@v2
@@ -99,12 +97,6 @@ jobs:
 
       - name: Build React app
         run: npm run build
-
-      # Debug to confirm variables are loaded
-      - name: Debug bucket and distribution ID in deploy_code
-        run: |
-          echo "Bucket Name: $AWS_S3_BUCKET"
-          echo "Distribution ID: $AWS_CLOUDFRONT_DISTRIBUTION_ID"
 
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
