@@ -60,3 +60,8 @@ Outputs:
     Description: "Nombre del bucket de S3 para la aplicación React"
     Value: !Ref ReactAppBucket
 
+
+
+ReactAppCloudFrontDistributionId:
+  Description: "ID de la distribución de CloudFront"
+  Value: !Ref ReactAppCloudFrontDistribution
