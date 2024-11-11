@@ -83,9 +83,9 @@ jobs:
 
       - name: Load Environment Variables from Temp File
         run: |
-          while IFS= read -r line; do
-            echo "$line" >> $GITHUB_ENV
-          done < ./${{ env.TEMP_ENV_FILE }}
+          set -a  # Activa la exportación automática de variables
+          source ./${{ env.TEMP_ENV_FILE }}
+          set +a  # Desactiva la exportación automática
           echo "Loaded AWS_S3_BUCKET: $AWS_S3_BUCKET"
           echo "Loaded AWS_CLOUDFRONT_DISTRIBUTION_ID: $AWS_CLOUDFRONT_DISTRIBUTION_ID"
 
@@ -100,7 +100,10 @@ jobs:
       - name: Build React app
         run: npm run build
 
-      # Debug to confirm variables are loaded
+      - name: Debug Temp Env File Content
+        run: cat ${{ env.TEMP_ENV_FILE }}
+
+      # Debug para confirmar variables cargadas
       - name: Debug bucket and distribution ID in deploy_code
         run: |
           echo "Bucket Name: $AWS_S3_BUCKET"
@@ -111,7 +114,7 @@ jobs:
         with:
           args: --acl public-read --follow-symlinks --delete
         env:
-          AWS_S3_BUCKET: $AWS_S3_BUCKET
+          AWS_S3_BUCKET: "${{ env.AWS_S3_BUCKET }}"  # Se asegura de usarlo como valor estático
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
