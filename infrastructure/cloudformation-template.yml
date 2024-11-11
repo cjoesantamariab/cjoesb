@@ -5,7 +5,7 @@ Resources:
       BucketName: !Sub "${AWS::StackName}-bucket-${AWS::AccountId}-${AWS::Region}"
       Tags:
         - Key: Version
-          Value: "v1.0.6"  # Cambia la versión para forzar una actualización
+          Value: "v1.0.7"  # Cambia la versión para forzar una actualización
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: error.html
