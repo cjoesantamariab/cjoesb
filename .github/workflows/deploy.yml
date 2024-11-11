@@ -59,20 +59,24 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      - name: Get S3 Bucket Name from CloudFormation
-        id: get_bucket_name
+      # Paso de depuración para verificar el nombre del bucket antes de configurarlo como output
+      - name: Debug S3 Bucket Name
         run: |
           bucket_name=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='ReactAppBucketName'].OutputValue" --output text)
+          echo "Detected Bucket Name: $bucket_name"
           echo "::set-output name=bucket_name::$bucket_name"
+        id: get_bucket_name
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
+      # Obtener el ID de la distribución de CloudFront
       - name: Get CloudFront Distribution ID from CloudFormation
         id: get_distribution_id
         run: |
           distribution_id=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='ReactAppCloudFrontDistributionId'].OutputValue" --output text)
+          echo "Detected Distribution ID: $distribution_id"
           echo "::set-output name=distribution_id::$distribution_id"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -99,8 +103,8 @@ jobs:
         run: npm run build
 
       # Paso de depuración para verificar el output de bucket_name
-      - name: Debug bucket name
-        run: 'echo "Bucket Name: ${{ needs.infrastructure.outputs.bucket_name }}"'
+      - name: Debug bucket name in deploy_code
+        run: 'echo "Bucket Name from infrastructure job: ${{ needs.infrastructure.outputs.bucket_name }}"'
 
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
