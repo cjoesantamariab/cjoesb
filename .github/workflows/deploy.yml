@@ -102,8 +102,8 @@ jobs:
         uses: jakejarvis/s3-sync-action@master
         with:
           args: --acl public-read --follow-symlinks --delete
-          destination: ${{ needs.infrastructure.outputs.bucket_name }}
         env:
+          AWS_S3_BUCKET: ${{ needs.infrastructure.outputs.bucket_name }}  # Usar AWS_S3_BUCKET en lugar de destination
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
