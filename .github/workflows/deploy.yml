@@ -7,7 +7,6 @@ on:
 
 env:
   STACK_NAME: my-react-app-stack  # Nombre fijo del stack
-  TEMP_ENV_FILE: temp_env_file  # Archivo temporal para guardar variables
 
 jobs:
   # Job 1: Comprobar si la infraestructura necesita desplegarse
@@ -48,25 +47,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      - name: Store S3 Bucket Name and CloudFront ID in File
-        run: |
-          bucket_name=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='ReactAppBucketName'].OutputValue" --output text)
-          distribution_id=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='ReactAppCloudFrontDistributionId'].OutputValue" --output text)
-          echo "Detected Bucket Name: $bucket_name"
-          echo "Detected Distribution ID: $distribution_id"
-          echo "AWS_S3_BUCKET=$bucket_name" >> ${{ env.TEMP_ENV_FILE }}
-          echo "AWS_CLOUDFRONT_DISTRIBUTION_ID=$distribution_id" >> ${{ env.TEMP_ENV_FILE }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-
-      - name: Upload Temp Env File
-        uses: actions/upload-artifact@v3
-        with:
-          name: temp-env
-          path: ${{ env.TEMP_ENV_FILE }}
-
   # Job 3: Despliegue del código compilado de React
   deploy_code:
     runs-on: ubuntu-latest
@@ -75,19 +55,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Download Temp Env File
-        uses: actions/download-artifact@v3
-        with:
-          name: temp-env
-          path: .
-
-      - name: Load Environment Variables from Temp File
+      - name: Get AWS Account ID
+        id: account_id
         run: |
-          set -a  # Activa la exportación automática de variables
-          source ./${{ env.TEMP_ENV_FILE }}
-          set +a  # Desactiva la exportación automática
-          echo "Loaded AWS_S3_BUCKET: $AWS_S3_BUCKET"
-          echo "Loaded AWS_CLOUDFRONT_DISTRIBUTION_ID: $AWS_CLOUDFRONT_DISTRIBUTION_ID"
+          aws_account_id=$(aws sts get-caller-identity --query "Account" --output text)
+          echo "AWS_ACCOUNT_ID=$aws_account_id" >> $GITHUB_ENV
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+
+      # Construir el nombre del bucket de forma dinámica
+      - name: Set S3 Bucket Name
+        run: echo "AWS_S3_BUCKET=${{ env.STACK_NAME }}-bucket-${{ env.AWS_ACCOUNT_ID }}-${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
 
       - name: Install Node.js and npm
         uses: actions/setup-node@v2
@@ -100,21 +80,17 @@ jobs:
       - name: Build React app
         run: npm run build
 
-      - name: Debug Temp Env File Content
-        run: cat ${{ env.TEMP_ENV_FILE }}
-
       # Debug para confirmar variables cargadas
-      - name: Debug bucket and distribution ID in deploy_code
+      - name: Debug bucket name and distribution ID
         run: |
           echo "Bucket Name: $AWS_S3_BUCKET"
-          echo "Distribution ID: $AWS_CLOUDFRONT_DISTRIBUTION_ID"
 
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
         with:
           args: --acl public-read --follow-symlinks --delete
         env:
-          AWS_S3_BUCKET: "${{ env.AWS_S3_BUCKET }}"  # Se asegura de usarlo como valor estático
+          AWS_S3_BUCKET: ${{ env.AWS_S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
