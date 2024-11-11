@@ -100,7 +100,7 @@ jobs:
 
       # Paso de depuración para verificar el output de bucket_name
       - name: Debug bucket name
-        run: echo "Bucket Name: ${{ needs.infrastructure.outputs.bucket_name }}"
+        run: 'echo "Bucket Name: ${{ needs.infrastructure.outputs.bucket_name }}"'
 
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
