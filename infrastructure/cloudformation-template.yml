@@ -5,7 +5,7 @@ Resources:
       BucketName: !Sub "${AWS::StackName}-bucket-${AWS::AccountId}-${AWS::Region}"
       Tags:
         - Key: Version
-          Value: "v1.0.29"  # Cambia la versión para forzar una actualización
+          Value: "v1.0.30"  # Cambia la versión para forzar una actualización
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: error.html
@@ -37,8 +37,10 @@ Resources:
             S3OriginConfig: {}
         Enabled: true
         DefaultRootObject: index.html
-        ViewerCertificate:
-          CloudFrontDefaultCertificate: true
+        # ViewerCertificate:
+        #   CloudFrontDefaultCertificate: true
+        Aliases:
+          - "cjoesb.site"
         DefaultCacheBehavior:
           AllowedMethods:
             - GET
@@ -47,7 +49,8 @@ Resources:
             - GET
             - HEAD
           TargetOriginId: S3Origin
-          ViewerProtocolPolicy: redirect-to-https
+          ViewerProtocolPolicy: allow-all 
+          # ViewerProtocolPolicy: redirect-to-https
           ForwardedValues:
             QueryString: false
             Cookies:
