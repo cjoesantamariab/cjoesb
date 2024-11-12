@@ -1,4 +1,6 @@
+// Experience.js
 import React from 'react';
+import { motion } from 'framer-motion';
 
 const experiences = [
   {
@@ -27,12 +29,17 @@ function Experience() {
       <h2>Experiencia Profesional</h2>
       <div className="timeline">
         {experiences.map((exp, index) => (
-          <div key={index} className="timeline-item">
+          <motion.div
+            key={index}
+            className="timeline-item"
+            whileHover={{ scale: 1.05, boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)" }}
+            transition={{ duration: 0.3 }}
+          >
             <h3>{exp.role}</h3>
             <h4>{exp.company}</h4>
             <p>{exp.duration}</p>
             <p>{exp.description}</p>
-          </div>
+          </motion.div>
         ))}
       </div>
     </section>

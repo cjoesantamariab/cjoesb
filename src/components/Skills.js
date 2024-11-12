@@ -4,7 +4,7 @@ const skills = {
   Frontend: ["Angular", "React", "JavaScript", "PrimeNG"],
   Backend: ["Node.js", "ASP.NET", "Quarkus", "Python"],
   Cloud: ["AWS (Lambda, EC2, S3, Cognito, ApiGateway, ECS, ECR, DynamoDB, CloudFront, WAF, VPC, RDS, CloudFormation, SQS, SES y SNS)", "Terraform"],
-  BasesDeDatos: ["SQL Server", "MongoDB", "MySQL"],
+  BasesDeDatos: ["SQL Server", "MongoDB", "MySQL", "PostgreSQL", "MariaDB", "DB2", "Oracle"],
 };
 
 function Skills() {

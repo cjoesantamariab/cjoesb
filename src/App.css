@@ -1,8 +1,29 @@
 body {
+  background: linear-gradient(45deg, #333, #111);
+  background-size: 400% 400%;
+  animation: gradientBackground 15s ease infinite;
+  font-family: Arial, sans-serif;
+  color: #f2f2f2;
+}
+
+@keyframes gradientBackground {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+/* 
+
+body {
   font-family: Arial, sans-serif;
   color: #f2f2f2;
   background-color: #181818;
-}
+} */
 
 .header {
   text-align: center;
