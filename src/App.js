@@ -1,16 +1,19 @@
-import './App.css';
-import BackGround from './components/BackGround';
-import InfoCard from './components/InfoCard';
-import DisableScroll from './components/DisableScroll';
-import Effects from './components/Effects';
+import React from 'react';
+import Header from './components/Header';
+import AboutMe from './components/AboutMe';
+import Experience from './components/Experience';
+import Skills from './components/Skills';
+import Footer from './components/Footer';
+import "./App.css";
 
 function App() {
   return (
     <div className="App">
-      <DisableScroll />
-      <Effects />
-      <BackGround />
-      <InfoCard />
+      <Header />
+      <AboutMe />
+      <Experience />
+      <Skills />
+      <Footer />
     </div>
   );
 }
