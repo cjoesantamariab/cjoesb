@@ -1,15 +1,27 @@
 Resources:
+  # Solicita el Certificado SSL en ACM para tu dominio personalizado
+  ReactAppCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: "cjoesb.site"  # Reemplaza con tu dominio
+      ValidationMethod: DNS
+      SubjectAlternativeNames:
+        - "www.cjoesb.site"  # Alternativamente puedes añadir el subdominio
+      DomainValidationOptions:
+        - DomainName: "cjoesb.site"
+          ValidationDomain: "cjoesb.site"
+
   ReactAppBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub "${AWS::StackName}-bucket-${AWS::AccountId}-${AWS::Region}"
       Tags:
         - Key: Version
-          Value: "v1.0.30"  # Cambia la versión para forzar una actualización
+          Value: "v1.0.31"
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: error.html
-      PublicAccessBlockConfiguration:  # Añadido para permitir acceso público
+      PublicAccessBlockConfiguration:
         BlockPublicAcls: false
         IgnorePublicAcls: false
         BlockPublicPolicy: false
@@ -37,10 +49,11 @@ Resources:
             S3OriginConfig: {}
         Enabled: true
         DefaultRootObject: index.html
-        # ViewerCertificate:
-        #   CloudFrontDefaultCertificate: true
         Aliases:
           - "cjoesb.site"
+        ViewerCertificate:
+          AcmCertificateArn: !Ref ReactAppCertificate  # Se refiere al certificado creado
+          SslSupportMethod: sni-only
         DefaultCacheBehavior:
           AllowedMethods:
             - GET
@@ -49,8 +62,7 @@ Resources:
             - GET
             - HEAD
           TargetOriginId: S3Origin
-          ViewerProtocolPolicy: allow-all 
-          # ViewerProtocolPolicy: redirect-to-https
+          ViewerProtocolPolicy: redirect-to-https
           ForwardedValues:
             QueryString: false
             Cookies:
