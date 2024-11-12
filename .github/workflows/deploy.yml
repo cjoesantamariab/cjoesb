@@ -104,6 +104,20 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           SOURCE_DIR: build/
 
+      - name: mostrar AWS_CLOUDFRONT_DISTRIBUTION_ID1
+        run: echo "AWS_CLOUDFRONT_DISTRIBUTION_ID"
+        
+      - name: mostrar AWS_CLOUDFRONT_DISTRIBUTION_ID2
+        run: echo $AWS_CLOUDFRONT_DISTRIBUTION_ID
+
+
+      # Muestra el valor de AWS_CLOUDFRONT_DISTRIBUTION_ID antes de la invalidación
+      - name: Debug AWS_CLOUDFRONT_DISTRIBUTION_ID3
+        run: echo "$AWS_CLOUDFRONT_DISTRIBUTION_ID"
+        env:
+          AWS_CLOUDFRONT_DISTRIBUTION_ID: ${{ needs.infrastructure.outputs.distribution_id }}
+
+
       - name: Invalidate CloudFront Cache
         run: |
           aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
