@@ -47,6 +47,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
+
       # Extrae el ID del Bucket de S3 y el ID de distribución de CloudFront
       - name: Get CloudFront Distribution ID
         id: get_outputs
@@ -56,6 +57,7 @@ jobs:
           echo "AWS_S3_BUCKET=$bucket_name" >> $GITHUB_ENV
           echo "AWS_CLOUDFRONT_DISTRIBUTION_ID=$distribution_id" >> $GITHUB_ENV
           echo "::set-output name=distribution_id::$distribution_id"
+          echo "Distribution ID retrieved: $distribution_id" # Imprime el valor para confirmar que no esté vacío
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -116,6 +118,11 @@ jobs:
         run: echo "$AWS_CLOUDFRONT_DISTRIBUTION_ID"
         env:
           AWS_CLOUDFRONT_DISTRIBUTION_ID: ${{ needs.infrastructure.outputs.distribution_id }}
+
+      # Muestra el valor de AWS_CLOUDFRONT_DISTRIBUTION_ID
+      - name: Debug AWS_CLOUDFRONT_DISTRIBUTION_ID4
+        run: |
+          echo "AWS_CLOUDFRONT_DISTRIBUTION_ID: ${{ needs.infrastructure.outputs.distribution_id }}"
 
 
       - name: Invalidate CloudFront Cache
