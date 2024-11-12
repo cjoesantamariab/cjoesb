@@ -71,6 +71,40 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Get AWS Account ID
+        id: account_id
+        run: |
+          aws_account_id=$(aws sts get-caller-identity --query "Account" --output text)
+          echo "AWS_ACCOUNT_ID=$aws_account_id" >> $GITHUB_ENV
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Set S3 Bucket Name
+        run: echo "AWS_S3_BUCKET=${{ env.STACK_NAME }}-bucket-${{ env.AWS_ACCOUNT_ID }}-${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
+
+      - name: Install Node.js and npm
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build React app
+        run: npm run build
+
+      - name: Deploy to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --follow-symlinks --delete     
+        env:
+          AWS_S3_BUCKET: ${{ env.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          SOURCE_DIR: build/
 
       - name: Get AWS CloudFront Distribution ID from Export
         id: get_cloudfront_id
@@ -95,68 +129,3 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}        
-
-      # - name: Get AWS Account ID
-      #   id: account_id
-      #   run: |
-      #     aws_account_id=$(aws sts get-caller-identity --query "Account" --output text)
-      #     echo "AWS_ACCOUNT_ID=$aws_account_id" >> $GITHUB_ENV
-      #   env:
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     AWS_REGION: ${{ secrets.AWS_REGION }}
-
-      # - name: Set S3 Bucket Name
-      #   run: echo "AWS_S3_BUCKET=${{ env.STACK_NAME }}-bucket-${{ env.AWS_ACCOUNT_ID }}-${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
-
-      # - name: Install Node.js and npm
-      #   uses: actions/setup-node@v2
-      #   with:
-      #     node-version: "14"
-
-      # - name: Install dependencies
-      #   run: npm install
-
-      # - name: Build React app
-      #   run: npm run build
-
-      # - name: Deploy to S3
-      #   uses: jakejarvis/s3-sync-action@master
-      #   with:
-      #     args: --follow-symlinks --delete     
-      #   env:
-      #     AWS_S3_BUCKET: ${{ env.AWS_S3_BUCKET }}
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     AWS_REGION: ${{ secrets.AWS_REGION }}
-      #     SOURCE_DIR: build/
-
-      # - name: mostrar AWS_CLOUDFRONT_DISTRIBUTION_ID1
-      #   run: echo "AWS_CLOUDFRONT_DISTRIBUTION_ID"
-        
-      # - name: mostrar AWS_CLOUDFRONT_DISTRIBUTION_ID2
-      #   run: !ImportValue: ReactAppCloudFrontDistributionId 
-        
-      # - name: mostrar AWS_CLOUDFRONT_DISTRIBUTION_ID3
-      #   run: !ImportValue: ReactAppCloudFrontDistributionId 
-
-      # # Muestra el valor de AWS_CLOUDFRONT_DISTRIBUTION_ID antes de la invalidación
-      # - name: Debug AWS_CLOUDFRONT_DISTRIBUTION_ID3
-      #   run: echo "$AWS_CLOUDFRONT_DISTRIBUTION_ID"
-      #   env:
-      #     AWS_CLOUDFRONT_DISTRIBUTION_ID: ${{ needs.infrastructure.outputs.distribution_id }}
-
-      # # Muestra el valor de AWS_CLOUDFRONT_DISTRIBUTION_ID
-      # - name: Debug AWS_CLOUDFRONT_DISTRIBUTION_ID4
-      #   run: |
-      #     echo "AWS_CLOUDFRONT_DISTRIBUTION_ID: ${{ needs.infrastructure.outputs.distribution_id }}"
-
-
-      # - name: Invalidate CloudFront Cache
-      #   run: |
-      #     aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
-      #   env:
-      #     AWS_CLOUDFRONT_DISTRIBUTION_ID: ${{ needs.infrastructure.outputs.distribution_id }}  # Obtenemos el output del job 'infrastructure'
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     AWS_REGION: ${{ secrets.AWS_REGION }}
