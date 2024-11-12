@@ -47,6 +47,20 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
+      # Extrae el ID del Bucket de S3 y el ID de distribución de CloudFront
+      - name: Get CloudFront Distribution ID
+        id: get_outputs
+        run: |
+          bucket_name=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='ReactAppBucketName'].OutputValue" --output text)
+          distribution_id=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='ReactAppCloudFrontDistributionId'].OutputValue" --output text)
+          echo "AWS_S3_BUCKET=$bucket_name" >> $GITHUB_ENV
+          echo "AWS_CLOUDFRONT_DISTRIBUTION_ID=$distribution_id" >> $GITHUB_ENV
+          echo "::set-output name=distribution_id::$distribution_id"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+
   # Job 3: Despliegue del código compilado de React
   deploy_code:
     runs-on: ubuntu-latest
@@ -65,7 +79,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      # Construir el nombre del bucket de forma dinámica
       - name: Set S3 Bucket Name
         run: echo "AWS_S3_BUCKET=${{ env.STACK_NAME }}-bucket-${{ env.AWS_ACCOUNT_ID }}-${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
 
@@ -80,26 +93,21 @@ jobs:
       - name: Build React app
         run: npm run build
 
-      # Debug para confirmar variables cargadas
-      - name: Debug bucket name and distribution ID
-        run: |
-          echo "Bucket Name: $AWS_S3_BUCKET"
-
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
         with:
-          args: --follow-symlinks --delete  # Opciones para sincronizar y eliminar archivos obsoletos     
+          args: --follow-symlinks --delete     
         env:
           AWS_S3_BUCKET: ${{ env.AWS_S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          SOURCE_DIR: build/
 
       - name: Invalidate CloudFront Cache
         run: |
           aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
         env:
+          AWS_CLOUDFRONT_DISTRIBUTION_ID: ${{ needs.infrastructure.outputs.distribution_id }}  # Obtenemos el output del job 'infrastructure'
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
