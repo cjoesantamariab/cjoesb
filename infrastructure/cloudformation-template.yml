@@ -3,13 +3,13 @@ Resources:
   ReactAppCertificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
-      DomainName: "cjoesb.site"  # Reemplaza con tu dominio
+      DomainName: "cjoesb.online"  # Reemplaza con tu dominio
       ValidationMethod: DNS
       SubjectAlternativeNames:
-        - "www.cjoesb.site"  # Alternativamente puedes añadir el subdominio
+        - "www.cjoesb.online"  # Alternativamente puedes añadir el subdominio
       DomainValidationOptions:
-        - DomainName: "cjoesb.site"
-          ValidationDomain: "cjoesb.site"
+        - DomainName: "cjoesb.online"
+          ValidationDomain: "cjoesb.online"
 
   ReactAppBucket:
     Type: AWS::S3::Bucket
