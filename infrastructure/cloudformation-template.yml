@@ -50,7 +50,7 @@ Resources:
         Enabled: true
         DefaultRootObject: index.html
         Aliases:
-          - "cjoesb.site"
+          - "cjoesb.online"
         ViewerCertificate:
           AcmCertificateArn: !Ref ReactAppCertificate  # Se refiere al certificado creado
           SslSupportMethod: sni-only
