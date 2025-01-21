@@ -17,7 +17,7 @@ Resources:
       BucketName: !Sub "${AWS::StackName}-bucket-${AWS::AccountId}-${AWS::Region}"
       Tags:
         - Key: Version
-          Value: "v1.0.34"
+          Value: "v1.0.35"
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: error.html
