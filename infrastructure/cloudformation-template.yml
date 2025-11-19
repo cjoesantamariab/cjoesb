@@ -5,19 +5,18 @@ Parameters:
   DomainName:
     Type: String
     Default: "cjoesb.space"
+
   SubDomainName:
     Type: String
     Default: "www.cjoesb.space"
 
+  HostedZoneId:
+    Type: String
+    Description: "ID de la zona alojada existente en Route53 (NO crear nuevas zonas)."
+
 Resources:
 
-  # 1. Hosted Zone para tu dominio
-  HostedZone:
-    Type: AWS::Route53::HostedZone
-    Properties:
-      Name: !Ref DomainName
-
-  # 2. Certificado SSL validado por DNS
+  # 1. Certificado con validación DNS automática
   ReactAppCertificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
@@ -27,11 +26,11 @@ Resources:
       ValidationMethod: DNS
       DomainValidationOptions:
         - DomainName: !Ref DomainName
-          HostedZoneId: !Ref HostedZone
+          HostedZoneId: !Ref HostedZoneId
         - DomainName: !Ref SubDomainName
-          HostedZoneId: !Ref HostedZone
+          HostedZoneId: !Ref HostedZoneId
 
-  # 3. Bucket S3
+  # 2. Bucket S3
   ReactAppBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -40,6 +39,7 @@ Resources:
         IndexDocument: index.html
         ErrorDocument: index.html
 
+  # 3. Bucket Policy
   ReactAppBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -52,7 +52,7 @@ Resources:
             Action: "s3:GetObject"
             Resource: !Sub "${ReactAppBucket.Arn}/*"
 
-  # 4. CloudFront
+  # 4. CloudFront Distribution
   ReactAppCloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
     Properties:
@@ -80,22 +80,22 @@ Resources:
               Forward: none
         PriceClass: PriceClass_100
 
-  # 5. Registro A apex
+  # 5. Registro raíz del dominio
   RootRecord:
     Type: AWS::Route53::RecordSet
     Properties:
-      HostedZoneId: !Ref HostedZone
+      HostedZoneId: !Ref HostedZoneId
       Name: !Ref DomainName
       Type: A
       AliasTarget:
-        HostedZoneId: Z2FDTNDATAQYW2 # CloudFront HostedZoneId siempre esta fijo
+        HostedZoneId: Z2FDTNDATAQYW2
         DNSName: !GetAtt ReactAppCloudFrontDistribution.DomainName
 
-  # 6. Registro A www
+  # 6. Registro www
   WWWRecord:
     Type: AWS::Route53::RecordSet
     Properties:
-      HostedZoneId: !Ref HostedZone
+      HostedZoneId: !Ref HostedZoneId
       Name: !Ref SubDomainName
       Type: A
       AliasTarget:
@@ -105,7 +105,6 @@ Resources:
 Outputs:
   ReactAppBucketName:
     Value: !Ref ReactAppBucket
+
   ReactAppCloudFrontDistributionId:
     Value: !Ref ReactAppCloudFrontDistribution
-  HostedZoneId:
-    Value: !Ref HostedZone
