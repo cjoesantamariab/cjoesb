@@ -18,13 +18,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Check if CloudFormation template changed
+      - name: Mark infrastructure as changed
         id: infra_check
         run: echo "infra_changed=true" >> $GITHUB_ENV
 
       - name: Set infra_changed output
         id: set_infra_output
-        run: echo "::set-output name=infra_changed::$(echo $infra_changed)"
+        run: |
+          echo "::set-output name=infra_changed::true"
 
   # Job 2: Despliegue de la infraestructura con CloudFormation
   infrastructure:
