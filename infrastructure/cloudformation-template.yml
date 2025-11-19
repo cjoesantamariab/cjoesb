@@ -12,7 +12,7 @@ Parameters:
 
   HostedZoneId:
     Type: String
-    Description: "ID de la zona alojada existente en Route53 (NO crear nuevas zonas)."
+    Description: "ID de zona alojada existente en Route53 (NO crear nuevas zonas)."
 
 Resources:
 
