@@ -47,7 +47,7 @@ jobs:
         id: get_outputs
         run: |
           distribution_id=$(aws cloudformation describe-stacks \
-            --region $AWS_REGION \
+            --region ${{ secrets.AWS_REGION }} \
             --stack-name $STACK_NAME \
             --query "Stacks[0].Outputs[?OutputKey=='ReactAppCloudFrontDistributionId'].OutputValue" \
             --output text)
