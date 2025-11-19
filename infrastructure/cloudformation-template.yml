@@ -3,13 +3,13 @@ Resources:
   ReactAppCertificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
-      DomainName: "cjoesb.online"  # Reemplaza con tu dominio
+      DomainName: "cjoesb.space"  # Reemplaza con tu dominio
       ValidationMethod: DNS
       SubjectAlternativeNames:
-        - "www.cjoesb.online"  # Alternativamente puedes añadir el subdominio
+        - "www.cjoesb.space"  # Alternativamente puedes añadir el subdominio
       DomainValidationOptions:
-        - DomainName: "cjoesb.online"
-          ValidationDomain: "cjoesb.online"
+        - DomainName: "cjoesb.space"
+          ValidationDomain: "cjoesb.space"
 
   ReactAppBucket:
     Type: AWS::S3::Bucket
@@ -17,7 +17,7 @@ Resources:
       BucketName: !Sub "${AWS::StackName}-bucket-${AWS::AccountId}-${AWS::Region}"
       Tags:
         - Key: Version
-          Value: "v1.0.35"
+          Value: "v1.0.36"
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: error.html
@@ -50,7 +50,7 @@ Resources:
         Enabled: true
         DefaultRootObject: index.html
         Aliases:
-          - "cjoesb.online"
+          - "cjoesb.space"
         ViewerCertificate:
           AcmCertificateArn: !Ref ReactAppCertificate  # Se refiere al certificado creado
           SslSupportMethod: sni-only
