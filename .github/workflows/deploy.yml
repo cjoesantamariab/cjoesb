@@ -52,16 +52,9 @@ jobs:
       - name: Get CloudFront Distribution ID
         id: get_outputs
         run: |
-          bucket_name=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='ReactAppBucketName'].OutputValue" --output text)
           distribution_id=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} --query "Stacks[0].Outputs[?OutputKey=='ReactAppCloudFrontDistributionId'].OutputValue" --output text)
-          echo "AWS_S3_BUCKET=$bucket_name" >> $GITHUB_ENV
           echo "AWS_CLOUDFRONT_DISTRIBUTION_ID=$distribution_id" >> $GITHUB_ENV
-          echo "::set-output name=distribution_id::$distribution_id"
-          echo "Distribution ID retrieved: $distribution_id" # Imprime el valor para confirmar que no esté vacío
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          echo "Distribution ID: $distribution_id"
 
   # Job 3: Despliegue del código compilado de React
   deploy_code:
@@ -129,22 +122,3 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-
-      - name: Configura el CNAME en Cloudflare para CloudFront
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
-          CLOUDFLARE_DNS_RECORD_NAME: "www.tu-dominio.com"
-          CLOUDFRONT_DOMAIN: "d1234abcd.cloudfront.net"
-        run: |
-          curl -X PUT "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records" \
-          -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-          -H "Content-Type: application/json" \
-          --data '{
-            "type": "CNAME",
-            "name": "'"$CLOUDFLARE_DNS_RECORD_NAME"'",
-            "content": "'"$CLOUDFRONT_DOMAIN"'",
-            "ttl": 1,
-            "proxied": true
-          }'
-   
